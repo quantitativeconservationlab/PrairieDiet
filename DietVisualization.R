@@ -77,7 +77,12 @@ dietdf <- dietdf %>%
 
 #check
 head( dietdf);dim(dietdf)
-
+#remove year from nest label
+dietdf <- dietdf %>% 
+  dplyr::rowwise() %>% 
+mutate( Nest = strsplit( Nest.ID, split = "_" )[[1]][1] )
+#check
+unique(dietdf$Nest)
 #add new labels summarizing diet at coarser levels
 birdnames <- c( "bird", "horned lark", "starling" )
 smallnames <- c( "kangaroo rat", "small mammal" )
@@ -94,16 +99,17 @@ dietdf$Prey <- factor( dietdf$Prey,
                     levels = c( "Unidentified",  "Reptile","Bird",
                                 "Mammal","Ground Squirrel") )
 
+
 ##########
 ############### visualize data summaries #######################
 
 #bargraphs of prey items by nest
 dietdf %>% 
-  group_by( Nest.ID ) %>% 
+  group_by( Nest ) %>% 
   count( Prey ) %>% 
 ggplot(.) +
   theme_bw( base_size = 15 ) +
-  geom_bar( aes( x = Nest.ID, y = n, fill = Prey ),
+  geom_bar( aes( x = Nest, y = n, fill = Prey ),
             stat = "identity" )
 
 #create pallete using colors we like
@@ -113,10 +119,10 @@ cbpalette <- c( "#56B4E9","#E69F00","#009E73", "#CC79A7","#D55E00" )
 #bargraphs of prey items by nest
 dietdf %>% 
 #  filter( Prey != "other" ) %>% 
-  group_by( Nest.ID ) %>% 
+  group_by( Nest ) %>% 
   count( Prey ) %>% 
   mutate( perc = n / sum( n ) * 100 ) %>% 
-  ggplot(., aes( x = Nest.ID, y = perc, fill = Prey ) ) +
+  ggplot(., aes( x = Nest, y = perc, fill = Prey ) ) +
   theme_classic( base_size = 15 ) +
   theme( legend.position = "top" ) +
   geom_bar( stat = "identity" ) + 
